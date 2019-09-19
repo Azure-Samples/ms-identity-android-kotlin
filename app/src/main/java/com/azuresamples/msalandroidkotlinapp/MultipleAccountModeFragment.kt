@@ -37,7 +37,6 @@ class MultipleAccountModeFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_multiple_account_mode, container, false)
-        initializeUI(view)
 
         // Creates a PublicClientApplication object with res/raw/auth_config_single_account.json
         PublicClientApplication.createMultipleAccountPublicClientApplication(
@@ -67,7 +66,7 @@ class MultipleAccountModeFragment : Fragment() {
     /**
      * Initializes UI variables and callbacks.
      */
-    private fun initializeUI(view: View) {
+    private fun initializeUI() {
        btn_removeAccount.setOnClickListener(View.OnClickListener {
             if (mMultipleAccountApp == null) {
                 return@OnClickListener
@@ -220,6 +219,13 @@ class MultipleAccountModeFragment : Fragment() {
                 Log.d(TAG, "User cancelled login.")
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        initializeUI()
+
     }
 
     /**
