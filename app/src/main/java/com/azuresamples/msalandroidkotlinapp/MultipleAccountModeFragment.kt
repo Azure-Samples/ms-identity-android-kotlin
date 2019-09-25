@@ -49,7 +49,7 @@ class MultipleAccountModeFragment : Fragment() {
                 }
 
                 override fun onError(error: MsalException){
-                    txt_log.text = "Device is in shared mode. Please switch to 'Single Account' mode."
+                    txt_log.text = "Please switch to 'Single Account' mode."
                     btn_removeAccount.isEnabled = false
                     btn_callGraphInteractively.isEnabled = false
                     btn_callGraphSilently.isEnabled = false
@@ -73,11 +73,7 @@ class MultipleAccountModeFragment : Fragment() {
             }
 
             /**
-             * Removes the selected account and cached tokens from this app (or device, if the device is in shared mode).
-             */
-
-            /**
-             * Removes the selected account and cached tokens from this app (or device, if the device is in shared mode).
+             * Removes the selected account and cached tokens from this app.
              */
             mMultipleAccountApp!!.removeAccount(
                 accountList!![account_list.selectedItemPosition],
@@ -166,7 +162,7 @@ class MultipleAccountModeFragment : Fragment() {
 
     /**
      * Load the currently signed-in account, if there's any.
-     * In the shared device mode, if the user is signed out from the device, the app can also perform the clean-up work in onAccountChanged().
+     * If the account is removed from the device, the app can also perform the clean-up work in onAccountChanged().
      */
     private fun loadAccount() {
         if (mMultipleAccountApp == null) {

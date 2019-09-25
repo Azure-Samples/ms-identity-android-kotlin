@@ -43,18 +43,10 @@ class SingleAccountModeFragment : Fragment() {
                 override fun onCreated(application: ISingleAccountPublicClientApplication) {
                     /**
                      * This test app assumes that the app is only going to support one account.
-                     * If the device is not marked as shared, This requires "account_mode" : "SINGLE" in the config json file.
-                     * In shared mode, MSAL will only returns ISingleAccountPublicClientApplication.
+                     * This requires "account_mode" : "SINGLE" in the config json file.
+                     *
                      */
                     mSingleAccountApp = application
-
-                    /**
-                     * Use this isSharedDevice() flag to adjust your UI accordingly in shared mode.
-                     */
-                    device_mode.text = if (mSingleAccountApp!!.isSharedDevice)
-                        "Shared"
-                    else
-                        "Non-Shared"
 
                     loadAccount()
                 }
@@ -86,11 +78,7 @@ class SingleAccountModeFragment : Fragment() {
             }
 
             /**
-             * Removes the signed-in account and cached tokens from this app (or device, if the device is in shared mode).
-             */
-
-            /**
-             * Removes the signed-in account and cached tokens from this app (or device, if the device is in shared mode).
+             * Removes the signed-in account and cached tokens from this app.
              */
             mSingleAccountApp!!.signOut(object : ISingleAccountPublicClientApplication.SignOutCallback {
                 override fun onSignOut() {
@@ -155,7 +143,7 @@ class SingleAccountModeFragment : Fragment() {
 
         initializeUI()
         /**
-         * In shared device mode, the account might be signed in/out by other apps while this app is not in focus.
+         * The account may have been removed from the device (if broker is in use).
          * Therefore, we want to update the account state by invoking loadAccount() here.
          */
         loadAccount()
@@ -172,7 +160,7 @@ class SingleAccountModeFragment : Fragment() {
 
     /**
      * Load the currently signed-in account, if there's any.
-     * In the shared device mode, if the user is signed out from the device, the app can also perform the clean-up work in onAccountChanged().
+     * If the account is removed the device, the app can also perform the clean-up work in onAccountChanged().
      */
     private fun loadAccount() {
         if (mSingleAccountApp == null) {
