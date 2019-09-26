@@ -1,0 +1,28 @@
+{
+  "Sample": {
+    "RepositoryUrl": "https://github.com/AzureSamples/ms-identity-android-kotlin",
+    "Title": "MSAL for Android Kotlin Sample",
+    "Level": 200,
+    "Client": "Android",
+    "Service": "Microsoft Graph",
+    "Endpoint": "Microsoft identity platform"
+  },
+  "AADApps": [
+    {
+      "Id": "Android-Kotlin",
+      "Name": "Android Kotlin",
+      "Kind": "Mobile", 
+      "Audience": "AzureADandPersonalMicrosoftAccount",
+      "RequiredResourcesAccess": [
+        {
+          "Resource": "Microsoft Graph",
+          "DelegatedPermissions": [
+            "User.Read"
+          ]
+        }
+      ],
+      "ReplyUrls": "msauth://<yourpackagename>/<yourbase64encodedsignature>"
+    }
+  ],
+  "CodeConfiguration": []
+}
