@@ -7,15 +7,13 @@ products:
 - azure
 - azure-active-directory
 - office-ms-graph
-urlFragment: msal-android-app
+urlFragment:
 ---
 
 # Use MSAL in an Android app to sign-in users and call Microsoft Graph
 
 | [Getting Started](https://docs.microsoft.com/azure/active-directory/develop/guidedsetups/active-directory-android)| [Library](https://github.com/AzureAD/microsoft-authentication-library-for-android) | [API Reference](http://javadoc.io/doc/com.microsoft.identity.client/msal) | [Support](README.md#community-help-and-support)
 | --- | --- | --- | --- |
-
-![Build Badge](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/500/badge)
 
 ## About the Sample
 
@@ -42,11 +40,10 @@ The majority of the logic in this sample shows how to sign-in an end user and ma
 ## Broker Authentication using MSAL
 
 Microsoft provides applications for every mobile platform that allow for the bridging of credentials across applications from different vendors and for enhanced features that require a single secure place from where to validate credentials. These are called brokers. The brokers available for Android are **Microsoft Authenticator** and **Company Portal**.
-[Learn more about Brokers here.](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-v1-enable-sso-android#single-sign-on-concepts)
+[Learn more about Brokers here.](https://docs.microsoft.com/azure/active-directory/develop/brokered-auth)
 
 The MSAL for Android will automatically use the broker if they are present on the device.
 
-> [!NOTE]
 > If you have older versions of **Microsoft Authenticator** app or [Company portal app](https://docs.microsoft.com/en-us/intune-user-help/install-and-sign-in-to-the-intune-company-portal-app-ios) installed in the device where this sample application will be run, then the user might not be able to test the scenarios presented here. Please make sure that you have installed the latest version of Microsoft Authenticator or Company Portal on your device.
 
 ### Single Account Mode
@@ -89,7 +86,6 @@ To run this sample, you'll need:
 
 ## Steps to Run the app
 
-> [!NOTE]
 > This sample ships with a default `redirect_uri` configured in the `AndroidManifest.xml`. In order for the default `redirect_uri` to work, this project must be built with the `debug.keystore` located in the `gradle/` directory. To configure signing in Android Studio, see [Sign Your App](https://developer.android.com/studio/publish/app-signing).
 
 ### Step 1: Clone the code
@@ -122,7 +118,6 @@ From menu, select *Run* > *Run 'app'*. Once the app launches,
 
 To explore more about the application, follow on screen options.
 
-> [!NOTE]
 > This sample application is configured to run out-of-the-box. To register your own application and run the sample with those settings, follow below steps.
 
 ## Register your Own Application (Optional)  
@@ -338,4 +333,4 @@ to Security Advisory Alerts.
 
 * The conceptual documentation for MSAL Android is available from [Microsoft authentication library for android conceptual documentation](https://aka.ms/msalandroid).
 
-* [Learn more about Brokers](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-v1-enable-sso-android#single-sign-on-concepts)
+* [Learn more about Brokers](https://docs.microsoft.com/azure/active-directory/develop/brokered-auth)
