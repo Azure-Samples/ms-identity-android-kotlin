@@ -19,7 +19,7 @@ urlFragment:
 
 The MSAL Android library gives your app the ability to begin using the [Microsoft identity platform](https://aka.ms/aaddev) by supporting [Azure Active Directory](https://azure.microsoft.com/services/active-directory/) and [Microsoft Accounts](https://account.microsoft.com) in a converged experience using industry standard OAuth2 and OpenID Connect protocols.
 
-This sample walks you through the process of integrating authentication with Microsoft Identity Platform (formerly Azure Active Directory for developers) in your android application. In this sample we'd walk you through the code you need to write in the various lifecycle events of your app to achieve the following objectives.
+This sample walks you through the process of integrating authentication with Microsoft Identity Platform (formerly Azure Active Directory for developers) in your android application. In this sample we'll walk you through the code you need to write in the various lifecycle events of your app to achieve the following objectives.
 
 * Sign-in a user
 * Device-wide SSO and Conditional Access support through the Auth Broker
@@ -31,7 +31,7 @@ This sample walks you through the process of integrating authentication with Mic
 ## Scenario
 
 This sample app is a [multi-tenant](https://docs.microsoft.com/en-us/azure/active-directory/develop/setup-multi-tenant-app) app, which means that it can sign-in users from any Azure AD tenant and Microsoft Accounts.  It also demonstrates how a developer can build apps to connect with enterprise users and access their Azure + O365 data via [Microsoft Graph](https://docs.microsoft.com/en-us/graph/overview).
-During the auth flow, the users will be required to sign-in first, if its their first time signing-in to the app, the user would be asked to consent to the [permissions](https://docs.microsoft.com/en-us/azure/active-directory/develop/v1-permissions-and-consent) required by the application.
+During the auth flow, the users will be required to sign-in first, if it's their first time signing-in to the app, the user would be asked to consent to the [permissions](https://docs.microsoft.com/en-us/azure/active-directory/develop/v1-permissions-and-consent) required by the application.
 
 The majority of the logic in this sample shows how to sign-in an end user and make a call to the Microsoft Graph to get basic information about the signed-in user.
 
@@ -58,7 +58,7 @@ PublicClientApplication.createSingleAccountPublicClientApplication(
     R.raw.auth_config_single_account);
 ```
 
-In the **auth_config_single_account.json** file, the `account_mode` is set as following:.
+In the **auth_config_single_account.json** file, the `account_mode` is set as following:
 
 ```json
 "account_mode" : "SINGLE",
@@ -66,7 +66,7 @@ In the **auth_config_single_account.json** file, the `account_mode` is set as fo
 
 ## Multiple Account Mode
 
-In the `Multiple Account` Mode, the application supports multiple accounts and can switch between accounts of the user and get data from that user's account.
+In the `Multiple Account` Mode, the application supports multiple accounts and can switch between user accounts and get data from that user's account.
 
 Code snippet from **MultipleAccountModeFragment** class shows how the application is set in the `Multiple Account` Mode in the code:
 
@@ -96,7 +96,7 @@ To run this sample, you'll need:
    git clone https://github.com/Azure-Samples/ms-identity-android-kotlin.git
   ```
 
-   The following steps have been carried out for android studio. But you can choose and work with any editor of your choice.
+   The following steps have been carried out for android studio, but you can choose and work with any editor of your choice.
 
    Open Android Studio, and select *open an existing Android Studio project*. Find the cloned project and open it.
 
@@ -150,11 +150,11 @@ From menu, select *Build* > *Clean Project* and *Run* > *Run 'app'*.
 
 ## About the code
 
-The following files have the code that would be of interest to you.
+The following code fragments walk through features that MSAL can implement.
 
 ### SingleAccountModeFragment class
 
-   Contains code showing how the `Single Account` Mode is implemented. The includes authentication, obtaining the token, and making a Graph api call using the obtained token.
+   Contains code showing how the `Single Account` Mode is implemented. The includes authentication, obtaining the token, and making a Graph API call using the obtained token.
 
    The following steps give you more details.
 
@@ -222,7 +222,7 @@ The following files have the code that would be of interest to you.
 
 ### MultipleAccountModeFragment class
 
-   Contains code showing how the `Multiple Account` Mode is implemented. The includes authentication and obtaining the token, and making a graph api call using the obtained token.
+   Contains code showing how the `Multiple Account` Mode is implemented. The includes authentication, obtaining the token, and making a Graph API call using the obtained token.
 
 1. Create a MultipleAccount PublicClientApplication:
 
@@ -271,11 +271,11 @@ The following files have the code that would be of interest to you.
         accountList!![account_list.selectedItemPosition],
         object : IMultipleAccountPublicClientApplication.RemoveAccountCallback {
             override fun onRemoved() {
-                
+
             }
 
             override fun onError(exception: MsalException) {
-                
+
             }
         })
     ```
