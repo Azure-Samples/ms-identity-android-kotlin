@@ -18,7 +18,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     internal enum class AppFragment {
         SingleAccount,
-        MultipleAccount
+        MultipleAccount,
+        B2C
     }
 
     private var mCurrentFragment: AppFragment? = null
@@ -36,7 +37,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
         val toggle = ActionBarDrawerToggle(
-            this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
         )
         drawer.addDrawerListener(toggle)
         toggle.syncState()
@@ -64,6 +65,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
                 if (id == R.id.nav_multiple_account) {
                     setCurrentFragment(AppFragment.MultipleAccount)
+                }
+
+                if (id == R.id.nav_b2c) {
+                    setCurrentFragment(AppFragment.B2C)
                 }
 
                 drawer_layout.removeDrawerListener(this)
@@ -97,6 +102,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 supportActionBar!!.title = "Multiple Account Mode"
                 return
             }
+
+            MainActivity.AppFragment.B2C -> {
+                supportActionBar!!.title = "MB2C Mode"
+                return
+            }
         }
     }
 
@@ -109,6 +119,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             MainActivity.AppFragment.MultipleAccount -> {
                 attachFragment(MultipleAccountModeFragment())
+                return
+            }
+
+            MainActivity.AppFragment.B2C -> {
+                attachFragment(B2CModeFragment())
                 return
             }
         }
