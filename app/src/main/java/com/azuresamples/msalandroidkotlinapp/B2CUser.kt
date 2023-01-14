@@ -30,7 +30,7 @@ import com.microsoft.identity.client.IMultipleAccountPublicClientApplication.Rem
 import com.microsoft.identity.client.SilentAuthenticationCallback
 import com.microsoft.identity.client.exception.MsalException
 import com.microsoft.identity.client.exception.MsalUiRequiredException
-import com.microsoft.identity.common.internal.providers.oauth2.IDToken
+import com.microsoft.identity.common.java.providers.oauth2.IDToken
 import java.util.*
 
 /**
