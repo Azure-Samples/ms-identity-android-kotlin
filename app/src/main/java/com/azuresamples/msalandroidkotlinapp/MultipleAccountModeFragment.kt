@@ -321,7 +321,7 @@ class MultipleAccountModeFragment : Fragment() {
         }
 
         val dataAdapter = ArrayAdapter(
-            context!!, android.R.layout.simple_spinner_item,
+            requireContext(), android.R.layout.simple_spinner_item,
             object : ArrayList<String>() {
                 init {
                     for (account in result)

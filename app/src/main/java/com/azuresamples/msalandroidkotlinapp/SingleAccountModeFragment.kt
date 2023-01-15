@@ -116,7 +116,7 @@ class SingleAccountModeFragment : Fragment() {
              * - the resource you're acquiring a token for has a stricter set of requirement than your SSO refresh token.
              * - you're introducing a new scope which the user has never consented for.
              */
-            mSingleAccountApp!!.acquireToken(activity!!, getScopes(), getAuthInteractiveCallback())
+            mSingleAccountApp!!.acquireToken(requireActivity(), getScopes(), getAuthInteractiveCallback())
         })
 
         btn_callGraphSilently.setOnClickListener(View.OnClickListener {
@@ -266,15 +266,15 @@ class SingleAccountModeFragment : Fragment() {
      */
     private fun callGraphAPI(authenticationResult: IAuthenticationResult) {
         MSGraphRequestWrapper.callGraphAPIWithVolley(
-            context as Context,
+            requireContext(),
             msgraph_url.text.toString(),
             authenticationResult.accessToken,
-            Response.Listener<JSONObject> { response ->
+            { response ->
                 /* Successfully called graph, process data and send to UI */
                 Log.d(TAG, "Response: $response")
                 displayGraphResult(response)
             },
-            Response.ErrorListener { error ->
+            { error ->
                 Log.d(TAG, "Error: $error")
                 displayError(error)
             })

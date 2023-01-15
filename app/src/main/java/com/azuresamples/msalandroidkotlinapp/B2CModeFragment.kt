@@ -68,7 +68,7 @@ class B2CModeFragment : Fragment() {
 
 
         // Creates a PublicClientApplication object with res/raw/auth_config_single_account.json
-        PublicClientApplication.createMultipleAccountPublicClientApplication(context!!,
+        PublicClientApplication.createMultipleAccountPublicClientApplication(requireContext(),
                 R.raw.auth_config_b2c,
                 object : IMultipleAccountApplicationCreatedListener {
                     override fun onCreated(application: IMultipleAccountPublicClientApplication) {
@@ -94,7 +94,7 @@ class B2CModeFragment : Fragment() {
     private fun initializeUI() {
 
         val dataAdapter = ArrayAdapter<String>(
-                context, android.R.layout.simple_spinner_item,
+                requireContext(), android.R.layout.simple_spinner_item,
                 object : ArrayList<String?>() {
                     init {
                         for (policyName in B2CConfiguration.Policies) add(policyName)
@@ -301,7 +301,7 @@ class B2CModeFragment : Fragment() {
             btn_acquireTokenSilently!!.isEnabled = false
         }
         val dataAdapter = ArrayAdapter<String>(
-                context, android.R.layout.simple_spinner_item,
+                requireContext(), android.R.layout.simple_spinner_item,
                 object : ArrayList<String?>() {
                     init {
                         for (user in users) add(user.displayName)
