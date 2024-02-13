@@ -4,9 +4,20 @@ plugins {
 }
 
 
-
-
 android {
+
+    signingConfigs {
+        getByName("debug") {
+            storeFile =
+                file("..\\gradle\\debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+
+
+    }
+
 
     namespace = "com.azuresamples.msalandroidkotlinapp"
     compileSdk = 34
@@ -22,6 +33,7 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        signingConfig = signingConfigs.getByName("debug")
 
     }
 
@@ -85,7 +97,7 @@ dependencies {
     implementation ("com.android.volley:volley:1.2.1")
     implementation ("androidx.legacy:legacy-support-v4:1.0.0")
 
-    implementation ("com.microsoft.identity.client:msal:4.+")
+    implementation ("com.microsoft.identity.client:msal:5.+")
     {
         exclude(group = "io.opentelemetry")
         exclude (group="com.microsoft.device.display")

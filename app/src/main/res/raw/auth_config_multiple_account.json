@@ -1,7 +1,7 @@
 {
-  "client_id" : "60e9af80-b2d0-4fd5-99a9-a5ceaf81761e",
-  "authorization_user_agent" : "DEFAULT",
-  "redirect_uri" : "msauth://com.azuresamples.msalandroidkotlinapp/6%2F1M2rs9NQxjMooLsPDES7UdTqs%3D",
+  "client_id" : "0984a7b6-bc13-4141-8b0d-8f767e136bb7",
+  "authorization_user_agent" : "Webview",
+  "redirect_uri" : "msauth://com.azuresamples.msalandroidkotlinapp/1wIqXSqBj7w%2Bh11ZifsnqwgyKrY%3D",
   "account_mode" : "MULTIPLE",
   "broker_redirect_uri_registered": true,
   "authorities" : [

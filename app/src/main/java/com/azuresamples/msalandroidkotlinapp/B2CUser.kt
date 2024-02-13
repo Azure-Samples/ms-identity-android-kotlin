@@ -22,6 +22,7 @@
 // THE SOFTWARE.
 package com.azuresamples.msalandroidkotlinapp
 
+import com.azuresamples.msalandroidkotlinapp.B2CConfiguration.getAuthorityFromPolicyName
 import com.microsoft.identity.client.AcquireTokenSilentParameters
 import com.microsoft.identity.client.IAccount
 import com.microsoft.identity.client.IMultipleAccountPublicClientApplication
@@ -38,14 +39,12 @@ class B2CUser private constructor() {
     /**
      * List of account objects that are associated to this B2C user.
      */
-    private val accounts: MutableList<IAccount> =
-        ArrayList()// Make sure that all of your policies are returning the same set of claims.
-
-    /**
-     * Gets this user's display name.
-     * If the value is not set, returns 'subject' instead.
-     */
+    private val accounts: MutableList<IAccount> = ArrayList()
     val displayName: String?
+        /**
+         * Gets this user's display name.
+         * If the value is not set, returns 'subject' instead.
+         */
         get() {
             if (accounts.isEmpty()) {
                 return null
@@ -68,7 +67,7 @@ class B2CUser private constructor() {
         for (account in accounts) {
             if (policyName.equals(getB2CPolicyNameFromAccount(account), ignoreCase = true)) {
                 val parameters = AcquireTokenSilentParameters.Builder()
-                    .fromAuthority(B2CConfiguration.getAuthorityFromPolicyName(policyName))
+                    .fromAuthority(getAuthorityFromPolicyName(policyName))
                     .withScopes(scopes)
                     .forAccount(account)
                     .withCallback(callback)

@@ -42,7 +42,7 @@ import com.google.android.material.navigation.NavigationView
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener,
     OnFragmentInteractionListener {
     internal enum class AppFragment {
-        SingleAccount, MultipleAccount, B2C, CIAM
+        SingleAccount, MultipleAccount, B2C
     }
 
     private var mCurrentFragment: AppFragment? = null
@@ -84,9 +84,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 if (id == R.id.nav_b2c) {
                     setCurrentFragment(AppFragment.B2C)
                 }
-                if (id == R.id.nav_ciam) {
-                    setCurrentFragment(AppFragment.CIAM)
-                }
 
                 drawer.removeDrawerListener(this)
             }
@@ -123,11 +120,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 supportActionBar!!.setBackgroundDrawable(ColorDrawable(Color.BLUE))
                 return
             }
-            AppFragment.CIAM -> {
-                supportActionBar!!.title = "CIAM Mode"
-                supportActionBar!!.setBackgroundDrawable(ColorDrawable(Color.BLUE))
-                return
-            }
+
             else -> {
                 return
             }
@@ -148,10 +141,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 attachFragment(B2CModeFragment())
                 return
             }
-            AppFragment.CIAM -> {
-                attachFragment(CIAMModeFragment())
-                return
-            }
+
 
             else -> {
                 return

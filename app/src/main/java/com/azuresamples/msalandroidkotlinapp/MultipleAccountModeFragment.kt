@@ -64,14 +64,14 @@ class MultipleAccountModeFragment() : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         val view: View = inflater.inflate(R.layout.fragment_multiple_account_mode, container, false)
         initializeUI(view)
 
         // Creates a PublicClientApplication object with res/raw/auth_config_single_account.json
         PublicClientApplication.createMultipleAccountPublicClientApplication(
-            context!!,
+            requireContext(),
             R.raw.auth_config_multiple_account,
             object : IMultipleAccountApplicationCreatedListener {
                 override fun onCreated(application: IMultipleAccountPublicClientApplication) {
@@ -81,9 +81,9 @@ class MultipleAccountModeFragment() : Fragment() {
 
                 override fun onError(exception: MsalException) {
                     displayError(exception)
-                    removeAccountButton!!.isEnabled = false
-                    callGraphApiInteractiveButton!!.isEnabled = false
-                    callGraphApiSilentButton!!.isEnabled = false
+                    removeAccountButton.isEnabled = false
+                    callGraphApiInteractiveButton.isEnabled = false
+                    callGraphApiSilentButton.isEnabled = false
                 }
             })
         return view

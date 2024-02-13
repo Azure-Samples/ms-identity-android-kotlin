@@ -21,7 +21,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 package com.azuresamples.msalandroidkotlinapp
-
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -51,7 +50,6 @@ class B2CModeFragment() : Fragment() {
     lateinit var removeAccountButton: Button
     lateinit var runUserFlowButton: Button
     lateinit var acquireTokenSilentButton: Button
-    lateinit var graphResourceTextView: TextView
     lateinit var logTextView: TextView
     lateinit var policyListSpinner: Spinner
     lateinit var b2cUserList: Spinner
@@ -96,7 +94,6 @@ class B2CModeFragment() : Fragment() {
         removeAccountButton = view.findViewById(R.id.btn_removeAccount)
         runUserFlowButton = view.findViewById(R.id.btn_runUserFlow)
         acquireTokenSilentButton = view.findViewById(R.id.btn_acquireTokenSilently)
-        graphResourceTextView = view.findViewById(R.id.msgraph_url)
         logTextView = view.findViewById(R.id.txt_log)
         policyListSpinner = view.findViewById(R.id.policy_list)
         b2cUserList = view.findViewById(R.id.user_list)
