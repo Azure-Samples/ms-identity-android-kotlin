@@ -85,7 +85,6 @@
                         android:id="@+id/msgraph_url"
                         android:layout_height="wrap_content"
                         android:layout_width="match_parent"
-                        android:text="https://graph.microsoft.com/v1.0/me"
                         android:textSize="12sp" />
                 </LinearLayout>
             </LinearLayout>
@@ -127,7 +126,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="3"
                     android:textStyle="bold"
-                    android:text="Device Mode" />
+                    android:text="Device mode" />
 
                 <TextView
                     android:id="@+id/device_mode"
@@ -135,9 +134,8 @@
                     android:layout_height="wrap_content"
                     android:paddingLeft="5dp"
                     android:layout_weight="7"
-                    android:text="Non-shared" />
+                    android:text="None" />
             </LinearLayout>
-
 
             <LinearLayout
                 android:layout_width="match_parent"

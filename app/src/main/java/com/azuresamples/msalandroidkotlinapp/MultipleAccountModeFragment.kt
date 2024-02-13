@@ -1,206 +1,228 @@
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
 package com.azuresamples.msalandroidkotlinapp
 
-import android.app.Activity
-import android.content.Context
+//import android.R
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.Toast
+import android.widget.*
 import androidx.fragment.app.Fragment
 import com.android.volley.Response
+import com.android.volley.VolleyError
+import com.azuresamples.msalandroidkotlinapp.MSGraphRequestWrapper.callGraphAPIUsingVolley
 import com.microsoft.identity.client.*
+//import com.microsoft.identity.client.IAccount.client.exception.MsalUiRequiredException
+import com.microsoft.identity.client.IMultipleAccountPublicClientApplication.RemoveAccountCallback
+import com.microsoft.identity.client.IPublicClientApplication.IMultipleAccountApplicationCreatedListener
+import com.microsoft.identity.client.IPublicClientApplication.LoadAccountsCallback
 import com.microsoft.identity.client.exception.MsalClientException
 import com.microsoft.identity.client.exception.MsalException
 import com.microsoft.identity.client.exception.MsalServiceException
 import com.microsoft.identity.client.exception.MsalUiRequiredException
-import kotlinx.android.synthetic.main.fragment_multiple_account_mode.*
 import org.json.JSONObject
 import java.util.*
 
-class MultipleAccountModeFragment : Fragment() {
-    private val TAG = MultipleAccountModeFragment::class.java.simpleName
-
-    /* Azure AD v2 Configs */
-    private val AUTHORITY = "https://login.microsoftonline.com/common"
+/**
+ * Implementation sample for 'Multiple account' mode.
+ */
+class MultipleAccountModeFragment() : Fragment() {
+    /* UI & Debugging Variables */
+    lateinit var removeAccountButton: Button
+    lateinit var  callGraphApiInteractiveButton: Button
+    lateinit var  callGraphApiSilentButton: Button
+    lateinit var  scopeTextView: TextView
+    lateinit var  graphResourceTextView: TextView
+    lateinit var  logTextView: TextView
+    lateinit var  accountListSpinner: Spinner
 
     /* Azure AD Variables */
     private var mMultipleAccountApp: IMultipleAccountPublicClientApplication? = null
-
     private var accountList: List<IAccount>? = null
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_multiple_account_mode, container, false)
+        val view: View = inflater.inflate(R.layout.fragment_multiple_account_mode, container, false)
+        initializeUI(view)
 
         // Creates a PublicClientApplication object with res/raw/auth_config_single_account.json
         PublicClientApplication.createMultipleAccountPublicClientApplication(
-            context as Context,
+            requireContext(),
             R.raw.auth_config_multiple_account,
-            object : IPublicClientApplication.IMultipleAccountApplicationCreatedListener {
+            object : IMultipleAccountApplicationCreatedListener {
                 override fun onCreated(application: IMultipleAccountPublicClientApplication) {
                     mMultipleAccountApp = application
-                    loadAccount()
+                    loadAccounts()
                 }
 
-                override fun onError(error: MsalException){
-                    txt_log.text = "Please switch to 'Single Account' mode."
-                    btn_removeAccount.isEnabled = false
-                    btn_callGraphInteractively.isEnabled = false
-                    btn_callGraphSilently.isEnabled = false
+                override fun onError(exception: MsalException) {
+                    displayError(exception)
+                    removeAccountButton.isEnabled = false
+                    callGraphApiInteractiveButton.isEnabled = false
+                    callGraphApiSilentButton.isEnabled = false
                 }
             })
-
         return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
     }
 
     /**
      * Initializes UI variables and callbacks.
      */
-    private fun initializeUI() {
-       btn_removeAccount.setOnClickListener(View.OnClickListener {
-            if (mMultipleAccountApp == null) {
-                return@OnClickListener
+    private fun initializeUI(view: View) {
+        removeAccountButton = view.findViewById(R.id.btn_removeAccount)
+        callGraphApiInteractiveButton = view.findViewById(R.id.btn_callGraphInteractively)
+        callGraphApiSilentButton = view.findViewById(R.id.btn_callGraphSilently)
+        scopeTextView = view.findViewById(R.id.scope)
+        graphResourceTextView = view.findViewById(R.id.msgraph_url)
+        logTextView = view.findViewById(R.id.txt_log)
+        accountListSpinner = view.findViewById(R.id.account_list)
+        val defaultGraphResourceUrl: String =
+            MSGraphRequestWrapper.MS_GRAPH_ROOT_ENDPOINT + "v1.0/me"
+        with(graphResourceTextView) { setText(defaultGraphResourceUrl) }
+        removeAccountButton.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(v: View) {
+                if (mMultipleAccountApp == null) {
+                    return
+                }
+
+                /*
+                 * Removes the selected account and cached tokens from this app (or device, if the device is in shared mode).
+                 */mMultipleAccountApp!!.removeAccount(
+                    accountList!!.get(accountListSpinner.getSelectedItemPosition()),
+                    object : RemoveAccountCallback {
+                        override fun onRemoved() {
+                            Toast.makeText(context, "Account removed.", Toast.LENGTH_SHORT)
+                                .show()
+
+                            /* Reload account asynchronously to get the up-to-date list. */loadAccounts()
+                        }
+
+                        override fun onError(exception: MsalException) {
+                            displayError(exception)
+                        }
+                    })
             }
-
-            /**
-             * Removes the selected account and cached tokens from this app.
-             */
-            mMultipleAccountApp!!.removeAccount(
-                accountList!![account_list.selectedItemPosition],
-                object : IMultipleAccountPublicClientApplication.RemoveAccountCallback {
-                    override fun onRemoved() {
-                        Toast.makeText(context, "Account removed.", Toast.LENGTH_SHORT)
-                            .show()
-
-                        /* Reload account asynchronously to get the up-to-date list. */
-                        loadAccount()
-                    }
-
-                    override fun onError(exception: MsalException) {
-                        displayError(exception)
-                    }
-                })
         })
-
-        btn_callGraphInteractively.setOnClickListener(View.OnClickListener {
-            if (mMultipleAccountApp == null) {
-                return@OnClickListener
+        callGraphApiInteractiveButton.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(v: View) {
+                if (mMultipleAccountApp == null) {
+                    return
+                }
+                val parameters: AcquireTokenParameters = AcquireTokenParameters.Builder()
+                    .startAuthorizationFromActivity(activity)
+                    .withScopes(Arrays.asList(*scopes))
+                    .withCallback(authInteractiveCallback)
+                    .build()
+                /*
+                 * Acquire token interactively. It will also create an account object for the silent call as a result (to be obtained by getAccount()).
+                 *
+                 * If acquireTokenSilent() returns an error that requires an interaction,
+                 * invoke acquireToken() to have the user resolve the interrupt interactively.
+                 *
+                 * Some example scenarios are
+                 *  - password change
+                 *  - the resource you're acquiring a token for has a stricter set of requirement than your SSO refresh token.
+                 *  - you're introducing a new scope which the user has never consented for.
+                 */mMultipleAccountApp!!.acquireToken(parameters)
             }
-
-            /**
-             * Acquire token interactively. It will also create an account object for the silent call as a result (to be obtained by getAccount()).
-             *
-             * If acquireTokenSilent() returns an error that requires an interaction,
-             * invoke acquireToken() to have the user resolve the interrupt interactively.
-             *
-             * Some example scenarios are
-             * - password change
-             * - the resource you're acquiring a token for has a stricter set of requirement than your SSO refresh token.
-             * - you're introducing a new scope which the user has never consented for.
-             */
-
-            /**
-             * Acquire token interactively. It will also create an account object for the silent call as a result (to be obtained by getAccount()).
-             *
-             * If acquireTokenSilent() returns an error that requires an interaction,
-             * invoke acquireToken() to have the user resolve the interrupt interactively.
-             *
-             * Some example scenarios are
-             * - password change
-             * - the resource you're acquiring a token for has a stricter set of requirement than your SSO refresh token.
-             * - you're introducing a new scope which the user has never consented for.
-             */
-            mMultipleAccountApp!!.acquireToken(activity as Activity, getScopes(), getAuthInteractiveCallback())
         })
+        callGraphApiSilentButton.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(v: View) {
+                if (mMultipleAccountApp == null) {
+                    return
+                }
+                val selectedAccount: IAccount =
+                    accountList!!.get(accountListSpinner.getSelectedItemPosition())
+                val silentParameters: AcquireTokenSilentParameters =
+                    AcquireTokenSilentParameters.Builder()
+                        .forAccount(selectedAccount)
+                        .fromAuthority(selectedAccount.authority)
+                        .withScopes(Arrays.asList(*scopes))
+                        .forceRefresh(false)
+                        .withCallback(authSilentCallback)
+                        .build()
 
-        btn_callGraphSilently.setOnClickListener(View.OnClickListener {
-            if (mMultipleAccountApp == null) {
-                return@OnClickListener
+                /*
+                 * Performs acquireToken without interrupting the user.
+                 *
+                 * This requires an account object of the account you're obtaining a token for.
+                 * (can be obtained via getAccount()).
+                 */mMultipleAccountApp!!.acquireTokenSilentAsync(silentParameters)
             }
-
-            /**
-             * Performs acquireToken without interrupting the user.
-             *
-             * This requires an account object of the account you're obtaining a token for.
-             * (can be obtained via getAccount()).
-             */
-
-            /**
-             * Performs acquireToken without interrupting the user.
-             *
-             * This requires an account object of the account you're obtaining a token for.
-             * (can be obtained via getAccount()).
-             */
-            mMultipleAccountApp!!.acquireTokenSilentAsync(
-                getScopes(),
-                accountList!![account_list.selectedItemPosition],
-                AUTHORITY,
-                getAuthSilentCallback()
-            )
         })
-
     }
 
     /**
      * Extracts a scope array from a text field,
      * i.e. from "User.Read User.ReadWrite" to ["user.read", "user.readwrite"]
      */
-    private fun getScopes(): Array<String> {
-        return scope.text.toString().toLowerCase().split(" ".toRegex()).dropLastWhile { it.isEmpty() }
-            .toTypedArray()
-    }
+    private val scopes: Array<String>
+        private get() = scopeTextView!!.text.toString().toLowerCase().split(" ").toTypedArray()
 
     /**
-     * Load the currently signed-in account, if there's any.
-     * If the account is removed from the device, the app can also perform the clean-up work in onAccountChanged().
+     * Load currently signed-in accounts, if there's any.
      */
-    private fun loadAccount() {
+    private fun loadAccounts() {
         if (mMultipleAccountApp == null) {
             return
         }
-
-        mMultipleAccountApp!!.getAccounts(object : IPublicClientApplication.LoadAccountsCallback {
+        mMultipleAccountApp!!.getAccounts(object : LoadAccountsCallback {
             override fun onTaskCompleted(result: List<IAccount>) {
+                // You can use the account data to update your UI or your app database.
                 accountList = result
                 updateUI(accountList!!)
             }
 
             override fun onError(exception: MsalException) {
-                txt_log.setText(exception.toString())
+                displayError(exception)
             }
         })
-    }
+    }/* Tokens expired or no session, retry with interactive *//* Exception when communicating with the STS, likely config issue *//* Exception inside MSAL, more info inside MsalError.java *//* Failed to acquireToken *//* Successfully got a token, use it to call a protected resource - MSGraph */
 
     /**
      * Callback used in for silent acquireToken calls.
-     * Looks if tokens are in the cache (refreshes if necessary and if we don't forceRefresh)
-     * else errors that we need to do an interactive request.
      */
-    private fun getAuthSilentCallback(): AuthenticationCallback {
-        return object : AuthenticationCallback {
-
+    private val authSilentCallback: SilentAuthenticationCallback
+        private get() = object : SilentAuthenticationCallback {
             override fun onSuccess(authenticationResult: IAuthenticationResult) {
                 Log.d(TAG, "Successfully authenticated")
 
-                /* Successfully got a token, use it to call a protected resource - MSGraph */
-                callGraphAPI(authenticationResult)
+                /* Successfully got a token, use it to call a protected resource - MSGraph */callGraphAPI(
+                    authenticationResult
+                )
             }
 
             override fun onError(exception: MsalException) {
                 /* Failed to acquireToken */
-                Log.d(TAG, "Authentication failed: " + exception.toString())
+                Log.d(
+                    TAG,
+                    "Authentication failed: $exception"
+                )
                 displayError(exception)
-
                 if (exception is MsalClientException) {
                     /* Exception inside MSAL, more info inside MsalError.java */
                 } else if (exception is MsalServiceException) {
@@ -209,79 +231,79 @@ class MultipleAccountModeFragment : Fragment() {
                     /* Tokens expired or no session, retry with interactive */
                 }
             }
+        }/* User canceled the authentication *//* Exception when communicating with the STS, likely config issue *//* Exception inside MSAL, more info inside MsalError.java *//* Failed to acquireToken *//* Successfully got a token, use it to call a protected resource - MSGraph */
 
-            override fun onCancel() {
-                /* User cancelled the authentication */
-                Log.d(TAG, "User cancelled login.")
-            }
-        }
-    }
+    /* call graph */
 
-    override fun onResume() {
-        super.onResume()
-
-        initializeUI()
-
-    }
-
+    /* Reload account asynchronously to get the up-to-date list. */
     /**
      * Callback used for interactive request.
      * If succeeds we use the access token to call the Microsoft Graph.
      * Does not check cache.
      */
-    private fun getAuthInteractiveCallback(): AuthenticationCallback {
-        return object : AuthenticationCallback {
+    private val authInteractiveCallback: AuthenticationCallback
+        private get() {
+            return object : AuthenticationCallback {
+                override fun onSuccess(authenticationResult: IAuthenticationResult) {
+                    /* Successfully got a token, use it to call a protected resource - MSGraph */
+                    Log.d(TAG, "Successfully authenticated")
+                    Log.d(
+                        TAG, "ID Token: " + authenticationResult.account.claims!!
+                            .get("id_token")
+                    )
 
-            override fun onSuccess(authenticationResult: IAuthenticationResult) {
-                /* Successfully got a token, use it to call a protected resource - MSGraph */
-                Log.d(TAG, "Successfully authenticated")
-                Log.d(TAG, "ID Token: " + authenticationResult.getAccount().getClaims()?.get("id_token"))
+                    /* call graph */callGraphAPI(authenticationResult)
 
-                /* call graph */
-                callGraphAPI(authenticationResult)
+                    /* Reload account asynchronously to get the up-to-date list. */loadAccounts()
+                }
 
-                /* Reload account asynchronously to get the up-to-date list. */
-                loadAccount()
-            }
+                override fun onError(exception: MsalException) {
+                    /* Failed to acquireToken */
+                    Log.d(
+                        TAG,
+                        "Authentication failed: $exception"
+                    )
+                    displayError(exception)
+                    if (exception is MsalClientException) {
+                        /* Exception inside MSAL, more info inside MsalError.java */
+                    } else if (exception is MsalServiceException) {
+                        /* Exception when communicating with the STS, likely config issue */
+                    }
+                }
 
-            override fun onError(exception: MsalException) {
-                /* Failed to acquireToken */
-                Log.d(TAG, "Authentication failed: " + exception.toString())
-                displayError(exception)
-
-                if (exception is MsalClientException) {
-                    /* Exception inside MSAL, more info inside MsalError.java */
-                } else if (exception is MsalServiceException) {
-                    /* Exception when communicating with the STS, likely config issue */
+                override fun onCancel() {
+                    /* User canceled the authentication */
+                    Log.d(TAG, "User cancelled login.")
                 }
             }
-
-            override fun onCancel() {
-                /* User canceled the authentication */
-                Log.d(TAG, "User cancelled login.")
-            }
         }
-    }
 
     /**
      * Make an HTTP request to obtain MSGraph data
+     *
+     * The sample is using the global service cloud as a default.
+     * If you're developing an app for sovereign cloud users, please change the Microsoft Graph Resource URL accordingly.
+     * https://docs.microsoft.com/en-us/graph/deployments#microsoft-graph-and-graph-explorer-service-root-endpoints
      */
     private fun callGraphAPI(authenticationResult: IAuthenticationResult) {
-        MSGraphRequestWrapper.callGraphAPIWithVolley(
-            context as Context,
-            msgraph_url.text.toString(),
-            authenticationResult.getAccessToken(),
-            Response.Listener<JSONObject> { response ->
-                /* Successfully called graph, process data and send to UI */
-                Log.d(TAG, "Response: $response")
-                displayGraphResult(response)
+        callGraphAPIUsingVolley(
+            (context)!!,
+            graphResourceTextView!!.text.toString(),
+            authenticationResult.accessToken,
+            object : Response.Listener<JSONObject> {
+                override fun onResponse(response: JSONObject) {
+                    /* Successfully called graph, process data and send to UI */
+                    Log.d(TAG, "Response: $response")
+                    displayGraphResult(response)
+                }
             },
-            Response.ErrorListener { error ->
-                Log.d(TAG, "Error: $error")
-                displayError(error)
+            object : Response.ErrorListener {
+                override fun onErrorResponse(error: VolleyError) {
+                    Log.d(TAG, "Error: $error")
+                    displayError(error)
+                }
             })
     }
-
     //
     // Helper methods manage UI updates
     // ================================
@@ -290,48 +312,47 @@ class MultipleAccountModeFragment : Fragment() {
     // updateSignedInUI() - Updates UI when the user is signed in
     // updateSignedOutUI() - Updates UI when app sign out succeeds
     //
-
     /**
      * Display the graph response
      */
     private fun displayGraphResult(graphResponse: JSONObject) {
-        txt_log.text = graphResponse.toString()
+        logTextView!!.text = graphResponse.toString()
     }
 
     /**
      * Display the error message
      */
     private fun displayError(exception: Exception) {
-        txt_log.text = exception.toString()
+        logTextView!!.text = exception.toString()
     }
 
     /**
      * Updates UI based on the obtained account list.
      */
     private fun updateUI(result: List<IAccount>) {
-
         if (result.size > 0) {
-            btn_removeAccount.isEnabled = true
-            btn_callGraphInteractively.isEnabled = true
-            btn_callGraphSilently.isEnabled = true
+            removeAccountButton!!.isEnabled = true
+            callGraphApiInteractiveButton!!.isEnabled = true
+            callGraphApiSilentButton!!.isEnabled = true
         } else {
-            btn_removeAccount.isEnabled = false
-            btn_callGraphInteractively.isEnabled = true
-            btn_callGraphSilently.isEnabled = false
+            removeAccountButton!!.isEnabled = false
+            callGraphApiInteractiveButton!!.isEnabled = true
+            callGraphApiSilentButton!!.isEnabled = false
         }
-
-        val dataAdapter = ArrayAdapter(
+        val dataAdapter: ArrayAdapter<String> = ArrayAdapter<String>(
             context!!, android.R.layout.simple_spinner_item,
-            object : ArrayList<String>() {
+            object : ArrayList<String?>() {
                 init {
-                    for (account in result)
-                        add(account.getUsername())
+                    for (account: IAccount in result) add(account.username)
                 }
             }
         )
-
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        account_list.adapter = dataAdapter
+        accountListSpinner!!.adapter = dataAdapter
         dataAdapter.notifyDataSetChanged()
+    }
+
+    companion object {
+        private val TAG: String = MultipleAccountModeFragment::class.java.simpleName
     }
 }

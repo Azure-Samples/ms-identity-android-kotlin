@@ -21,15 +21,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 package com.azuresamples.msalandroidkotlinapp
-
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.Spinner
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.azuresamples.msalandroidkotlinapp.B2CConfiguration.getAuthorityFromPolicyName
+import com.azuresamples.msalandroidkotlinapp.B2CConfiguration.scopes
 import com.microsoft.identity.client.*
 import com.microsoft.identity.client.IMultipleAccountPublicClientApplication.RemoveAccountCallback
 import com.microsoft.identity.client.IPublicClientApplication.IMultipleAccountApplicationCreatedListener
@@ -38,37 +41,34 @@ import com.microsoft.identity.client.exception.MsalClientException
 import com.microsoft.identity.client.exception.MsalException
 import com.microsoft.identity.client.exception.MsalServiceException
 import com.microsoft.identity.client.exception.MsalUiRequiredException
-import kotlinx.android.synthetic.main.fragment_b2c_mode.*
-import java.util.*
 
 /**
  * Implementation sample for 'B2C' mode.
  */
-class B2CModeFragment : Fragment() {
+class B2CModeFragment() : Fragment() {
     /* UI & Debugging Variables */
-    /*var removeAccountButton: Button? = null
-    var runUserFlowButton: Button? = null
-    var acquireTokenSilentButton: Button? = null
-    var graphResourceTextView: TextView? = null
-    var logTextView: TextView? = null
-    var policyListSpinner: Spinner? = null
-    var b2cUserList: Spinner? = null*/
+    lateinit var removeAccountButton: Button
+    lateinit var runUserFlowButton: Button
+    lateinit var acquireTokenSilentButton: Button
+    lateinit var logTextView: TextView
+    lateinit var policyListSpinner: Spinner
+    lateinit var b2cUserList: Spinner
     private var users: List<B2CUser>? = null
 
     /* Azure AD Variables */
-    private var b2cApp: IMultipleAccountPublicClientApplication? = null
-
-
+    private lateinit var b2cApp: IMultipleAccountPublicClientApplication
     override fun onCreateView(
-            inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_b2c_mode, container, false)
-
+        initializeUI(view)
 
         // Creates a PublicClientApplication object with res/raw/auth_config_single_account.json
-        PublicClientApplication.createMultipleAccountPublicClientApplication(context!!,
+        context?.let {
+            PublicClientApplication.createMultipleAccountPublicClientApplication(
+                it,
                 R.raw.auth_config_b2c,
                 object : IMultipleAccountApplicationCreatedListener {
                     override fun onCreated(application: IMultipleAccountPublicClientApplication) {
@@ -78,81 +78,86 @@ class B2CModeFragment : Fragment() {
 
                     override fun onError(exception: MsalException) {
                         displayError(exception)
-
-
-                        btn_removeAccount!!.isEnabled = false
-                        btn_runUserFlow!!.isEnabled = false
-                        btn_acquireTokenSilently!!.isEnabled = false
+                        removeAccountButton!!.isEnabled = false
+                        runUserFlowButton!!.isEnabled = false
+                        acquireTokenSilentButton!!.isEnabled = false
                     }
                 })
+        }
         return view
     }
 
     /**
      * Initializes UI variables and callbacks.
      */
-    private fun initializeUI() {
-
-        val dataAdapter = ArrayAdapter<String>(
-                context, android.R.layout.simple_spinner_item,
-                object : ArrayList<String?>() {
-                    init {
-                        for (policyName in B2CConfiguration.Policies) add(policyName)
-                    }
+    private fun initializeUI(view: View) {
+        removeAccountButton = view.findViewById(R.id.btn_removeAccount)
+        runUserFlowButton = view.findViewById(R.id.btn_runUserFlow)
+        acquireTokenSilentButton = view.findViewById(R.id.btn_acquireTokenSilently)
+        logTextView = view.findViewById(R.id.txt_log)
+        policyListSpinner = view.findViewById(R.id.policy_list)
+        b2cUserList = view.findViewById(R.id.user_list)
+        val dataAdapter: ArrayAdapter<String> = ArrayAdapter<String>(
+            (context)!!, android.R.layout.simple_spinner_item,
+            object : ArrayList<String?>() {
+                init {
+                    for (policyName: String in B2CConfiguration.Policies) add(policyName)
                 }
+            }
         )
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        policy_list.setAdapter(dataAdapter)
+        policyListSpinner.setAdapter(dataAdapter)
         dataAdapter.notifyDataSetChanged()
-        btn_runUserFlow.setOnClickListener(View.OnClickListener {
-            if (b2cApp == null) {
-                return@OnClickListener
-            }
-            /**
-             * Runs user flow interactively.
-             *
-             *
-             * Once the user finishes with the flow, you will also receive an access token containing the claims for the scope you passed in (see B2CConfiguration.getScopes()),
-             * which you can subsequently use to obtain your resources.
-             */
-            /**
-             * Runs user flow interactively.
-             *
-             *
-             * Once the user finishes with the flow, you will also receive an access token containing the claims for the scope you passed in (see B2CConfiguration.getScopes()),
-             * which you can subsequently use to obtain your resources.
-             */
-            val parameters = AcquireTokenParameters.Builder()
+        runUserFlowButton.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(v: View) {
+                if (b2cApp == null) {
+                    return
+                }
+                /**
+                 * Runs user flow interactively.
+                 *
+                 *
+                 * Once the user finishes with the flow, you will also receive an access token containing the claims for the scope you passed in (see B2CConfiguration.getScopes()),
+                 * which you can subsequently use to obtain your resources.
+                 */
+                val parameters: AcquireTokenParameters = AcquireTokenParameters.Builder()
                     .startAuthorizationFromActivity(activity)
-                    .fromAuthority(getAuthorityFromPolicyName(policy_list.getSelectedItem().toString()))
-                    .withScopes(B2CConfiguration.scopes)
+                    .fromAuthority(
+                        getAuthorityFromPolicyName(
+                            policyListSpinner.getSelectedItem().toString()
+                        )
+                    )
+                    .withScopes(scopes)
                     .withPrompt(Prompt.LOGIN)
                     .withCallback(authInteractiveCallback)
                     .build()
-
-            b2cApp!!.acquireToken(parameters)
-        })
-
-        btn_acquireTokenSilently.setOnClickListener(View.OnClickListener {
-            if (b2cApp == null) {
-                return@OnClickListener
+                b2cApp!!.acquireToken(parameters)
             }
-            val selectedUser = users!![user_list.getSelectedItemPosition()]
-            selectedUser.acquireTokenSilentAsync(b2cApp!!,
-                    policy_list.getSelectedItem().toString(),
-                    B2CConfiguration.scopes,
-                    authSilentCallback)
         })
-
-        btn_removeAccount.setOnClickListener(View.OnClickListener {
-            if (b2cApp == null) {
-                return@OnClickListener
+        acquireTokenSilentButton.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(v: View) {
+                if (b2cApp == null) {
+                    return
+                }
+                val selectedUser: B2CUser = users!!.get(b2cUserList.getSelectedItemPosition())
+                selectedUser.acquireTokenSilentAsync(
+                    b2cApp,
+                    policyListSpinner.getSelectedItem().toString(),
+                    scopes,
+                    authSilentCallback
+                )
             }
-            val selectedUser = users!![user_list.getSelectedItemPosition()]
-            selectedUser.signOutAsync(b2cApp!!,
+        })
+        removeAccountButton.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(v: View) {
+                if (b2cApp == null) {
+                    return
+                }
+                val selectedUser: B2CUser = users!!.get(b2cUserList.getSelectedItemPosition())
+                selectedUser.signOutAsync(b2cApp,
                     object : RemoveAccountCallback {
                         override fun onRemoved() {
-                            txt_log.setText("Signed Out.")
+                            logTextView.setText("Signed Out.")
                             loadAccounts()
                         }
 
@@ -160,14 +165,8 @@ class B2CModeFragment : Fragment() {
                             displayError(exception)
                         }
                     })
+            }
         })
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        initializeUI()
-
     }
 
     /**
@@ -202,7 +201,10 @@ class B2CModeFragment : Fragment() {
 
             override fun onError(exception: MsalException) {
                 /* Failed to acquireToken */
-                Log.d(TAG, "Authentication failed: $exception")
+                Log.d(
+                    TAG,
+                    "Authentication failed: $exception"
+                )
                 displayError(exception)
                 if (exception is MsalClientException) {
                     /* Exception inside MSAL, more info inside MsalError.java */
@@ -222,41 +224,43 @@ class B2CModeFragment : Fragment() {
      * If succeeds we use the access token to call the Microsoft Graph.
      * Does not check cache.
      */
-
-
     private val authInteractiveCallback: AuthenticationCallback
-        private get() = object : AuthenticationCallback {
-            override fun onSuccess(authenticationResult: IAuthenticationResult) {
-                /* Successfully got a token, use it to call a protected resource - MSGraph */
-                Log.d(TAG, "Successfully authenticated")
+        private get() {
+            return object : AuthenticationCallback {
+                override fun onSuccess(authenticationResult: IAuthenticationResult) {
+                    /* Successfully got a token, use it to call a protected resource - MSGraph */
+                    Log.d(TAG, "Successfully authenticated")
 
-                /* display result info */displayResult(authenticationResult)
+                    /* display result info */displayResult(authenticationResult)
 
-                /* Reload account asynchronously to get the up-to-date list. */loadAccounts()
-            }
-
-            override fun onError(exception: MsalException) {
-                val B2C_PASSWORD_CHANGE = "AADB2C90118"
-                if (exception.message!!.contains(B2C_PASSWORD_CHANGE)) {
-                    txt_log!!.text = """
-                        The user clicks the 'Forgot Password' link in a sign-up or sign-in user flow.
-                        Your application needs to handle this error code by running a specific user flow that resets the password.
-                        """.trimIndent()
-                    return
+                    /* Reload account asynchronously to get the up-to-date list. */loadAccounts()
                 }
 
-                /* Failed to acquireToken */Log.d(TAG, "Authentication failed: $exception")
-                displayError(exception)
-                if (exception is MsalClientException) {
-                    /* Exception inside MSAL, more info inside MsalError.java */
-                } else if (exception is MsalServiceException) {
-                    /* Exception when communicating with the STS, likely config issue */
-                }
-            }
+                override fun onError(exception: MsalException) {
+                    val B2C_PASSWORD_CHANGE: String = "AADB2C90118"
+                    if (exception.message!!.contains(B2C_PASSWORD_CHANGE)) {
+                        logTextView!!.text =
+                            "The user clicks the 'Forgot Password' link in a sign-up or sign-in user flow.\n" +
+                                    "Your application needs to handle this error code by running a specific user flow that resets the password."
+                        return
+                    }
 
-            override fun onCancel() {
-                /* User canceled the authentication */
-                Log.d(TAG, "User cancelled login.")
+                    /* Failed to acquireToken */Log.d(
+                        TAG,
+                        "Authentication failed: $exception"
+                    )
+                    displayError(exception)
+                    if (exception is MsalClientException) {
+                        /* Exception inside MSAL, more info inside MsalError.java */
+                    } else if (exception is MsalServiceException) {
+                        /* Exception when communicating with the STS, likely config issue */
+                    }
+                }
+
+                override fun onCancel() {
+                    /* User canceled the authentication */
+                    Log.d(TAG, "User cancelled login.")
+                }
             }
         }
     //
@@ -271,22 +275,18 @@ class B2CModeFragment : Fragment() {
      * Display the graph response
      */
     private fun displayResult(result: IAuthenticationResult) {
-        val output = """
-         Access Token :${result.accessToken}
-         Scope : ${result.scope}
-         Expiry : ${result.expiresOn}
-         Tenant ID : ${result.tenantId}
-         
-         """.trimIndent()
-        Log.d(TAG, output)
-        txt_log!!.text = output
+        val output: String = ("Access Token :" + result.accessToken + "\n" +
+                "Scope : " + result.scope + "\n" +
+                "Expiry : " + result.expiresOn + "\n" +
+                "Tenant ID : " + result.tenantId + "\n")
+        logTextView!!.text = output
     }
 
     /**
      * Display the error message
      */
     private fun displayError(exception: Exception) {
-        txt_log!!.text = exception.toString()
+        logTextView!!.text = exception.toString()
     }
 
     /**
@@ -294,26 +294,26 @@ class B2CModeFragment : Fragment() {
      */
     private fun updateUI(users: List<B2CUser>?) {
         if (users!!.size != 0) {
-            btn_removeAccount!!.isEnabled = true
-            btn_acquireTokenSilently!!.isEnabled = true
+            removeAccountButton!!.isEnabled = true
+            acquireTokenSilentButton!!.isEnabled = true
         } else {
-            btn_removeAccount!!.isEnabled = false
-            btn_acquireTokenSilently!!.isEnabled = false
+            removeAccountButton!!.isEnabled = false
+            acquireTokenSilentButton!!.isEnabled = false
         }
-        val dataAdapter = ArrayAdapter<String>(
-                context, android.R.layout.simple_spinner_item,
-                object : ArrayList<String?>() {
-                    init {
-                        for (user in users) add(user.displayName)
-                    }
+        val dataAdapter: ArrayAdapter<String> = ArrayAdapter<String>(
+            (context)!!, android.R.layout.simple_spinner_item,
+            object : ArrayList<String?>() {
+                init {
+                    for (user: B2CUser in users) add(user.displayName)
                 }
+            }
         )
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        user_list!!.adapter = dataAdapter
+        b2cUserList!!.adapter = dataAdapter
         dataAdapter.notifyDataSetChanged()
     }
 
     companion object {
-        private val TAG = B2CModeFragment::class.java.simpleName
+        private val TAG: String = B2CModeFragment::class.java.simpleName
     }
 }

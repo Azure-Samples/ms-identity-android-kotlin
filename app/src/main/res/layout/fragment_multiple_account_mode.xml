@@ -85,7 +85,6 @@
                         android:id="@+id/msgraph_url"
                         android:layout_height="wrap_content"
                         android:layout_width="match_parent"
-                        android:text="https://graph.microsoft.com/v1.0/me"
                         android:textSize="12sp" />
                 </LinearLayout>
             </LinearLayout>

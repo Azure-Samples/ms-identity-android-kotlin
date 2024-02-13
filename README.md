@@ -12,14 +12,16 @@ urlFragment:
 
 # Use MSAL in an Android app to sign-in users and call Microsoft Graph
 
-| [Getting Started](https://docs.microsoft.com/azure/active-directory/develop/guidedsetups/active-directory-android)| [Library](https://github.com/AzureAD/microsoft-authentication-library-for-android) | [API Reference](http://javadoc.io/doc/com.microsoft.identity.client/msal) | [Support](README.md#community-help-and-support)
+| [Getting Started](https://docs.microsoft.com/azure/active-directory/develop/guidedsetups/active-directory-android)| [Library](https://github.com/AzureAD/microsoft-authentication-library-for-android) | [API Reference](http://javadoc.io/doc/com.microsoft.identity.client/msal) | [Support](README.md#feedback-community-help-and-support)
 | --- | --- | --- | --- |
+
+![Build Badge](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/500/badge)
 
 ## About the Sample
 
 The MSAL Android library gives your app the ability to begin using the [Microsoft identity platform](https://aka.ms/aaddev) by supporting [Azure Active Directory](https://azure.microsoft.com/services/active-directory/) and [Microsoft Accounts](https://account.microsoft.com) in a converged experience using industry standard OAuth2 and OpenID Connect protocols.
 
-This sample walks you through the process of integrating authentication with Microsoft Identity Platform (formerly Azure Active Directory for developers) in your android application. In this sample we'll walk you through the code you need to write in the various lifecycle events of your app to achieve the following objectives.
+This sample walks you through the process of integrating authentication with Microsoft Identity Platform (formerly Azure Active Directory for developers) in your android application. In this sample we'd walk you through the code you need to write in the various lifecycle events of your app to achieve the following objectives.
 
 * Sign-in a user
 * Device-wide SSO and Conditional Access support through the Auth Broker
@@ -30,21 +32,22 @@ This sample walks you through the process of integrating authentication with Mic
 
 ## Scenario
 
-This sample app is a [multi-tenant](https://docs.microsoft.com/en-us/azure/active-directory/develop/setup-multi-tenant-app) app, which means that it can sign-in users from any Azure AD tenant and Microsoft Accounts.  It also demonstrates how a developer can build apps to connect with enterprise users and access their Azure + O365 data via [Microsoft Graph](https://docs.microsoft.com/en-us/graph/overview).
-During the auth flow, the users will be required to sign-in first, if it's their first time signing-in to the app, the user would be asked to consent to the [permissions](https://docs.microsoft.com/en-us/azure/active-directory/develop/v1-permissions-and-consent) required by the application.
+This sample app is a [multi-tenant](https://docs.microsoft.com/azure/active-directory/develop/setup-multi-tenant-app) app, which means that it can sign-in users from any Azure AD tenant and Microsoft Accounts.  It also demonstrates how a developer can build apps to connect with enterprise users and access their Azure + O365 data via [Microsoft Graph](https://docs.microsoft.com/graph/overview).
+During the auth flow, the users will be required to sign-in first, if it is their first time signing-in to the app, the user would be asked to consent to the [permissions](https://docs.microsoft.com/azure/active-directory/develop/v1-permissions-and-consent) required by the application.
 
 The majority of the logic in this sample shows how to sign-in an end user and make a call to the Microsoft Graph to get basic information about the signed-in user.
 
-![Flowchart](ReadmeFiles/image1.png)
+![Flowchart](ReadmeFiles/Authflow.png)
 
 ## Broker Authentication using MSAL
 
-Microsoft provides applications for every mobile platform that allow for the bridging of credentials across applications from different vendors and for enhanced features that require a single secure place from where to validate credentials. These are called brokers. The brokers available for Android are **Microsoft Authenticator** and **Company Portal**.
+Microsoft provides applications for every mobile platform that allow for the bridging credentials across applications from different vendors and for enhanced features that require a single secure place from where to validate credentials. These applications are called Brokers. The brokers available for Android are **Microsoft Authenticator** and **Company Portal**.
 [Learn more about Brokers here.](https://docs.microsoft.com/azure/active-directory/develop/brokered-auth)
 
 The MSAL for Android will automatically use the broker if they are present on the device.
 
-> If you have older versions of **Microsoft Authenticator** app or [Company portal app](https://docs.microsoft.com/en-us/intune-user-help/install-and-sign-in-to-the-intune-company-portal-app-ios) installed in the device where this sample application will be run, then the user might not be able to test the scenarios presented here. Please make sure that you have installed the latest version of Microsoft Authenticator or Company Portal on your device.
+> **Note:**
+> If you have older versions of **Microsoft Authenticator** or **Company Portal** App installed in the device where this sample application will be run, then the user might not be able to test the scenarios presented here. Please make sure that you have installed the latest version of Microsoft Authenticator or Company Portal on your device.
 
 ### Single Account Mode
 
@@ -63,6 +66,28 @@ In the **auth_config_single_account.json** file, the `account_mode` is set as fo
 ```json
 "account_mode" : "SINGLE",
 ```
+
+#### Single Account Mode with Shared Device Mode
+
+`Shared Device` Mode will allow you to configure Android devices to be shared by multiple employees, while providing Microsoft Identity backed management of the device. Employees will be able to sign-in to their devices and access customer information quickly. When they are finished with their shift or task, they will be able to globally Sign-Out of the device and it will be immediately ready for the next employee to use.
+
+![Flowchart](ReadmeFiles/shareddeviceflowchart.png)
+
+> [!NOTE]
+> Applications that run on Shared Devices must be in Single Account Mode. Applications that only support Multiple Account Mode will not run on a Shared Device.
+
+In the code, you can use the `isSharedDevice()` flag to determine if an application is in the Shared Device Mode. Your app can use this flag to modify UX accordingly.
+
+Code snippet from **SingleAccountModeFragment** class showing usage of the `isSharedDevice()` flag:
+
+```Java
+deviceModeTextView.setText(mSingleAccountApp.isSharedDevice() ? "Shared" : "Non-Shared");
+```
+
+> [!NOTE]
+> You can only [put a device in to Shared Mode](https://docs.microsoft.com/azure/active-directory/develop/tutorial-v2-shared-device-mode#set-up-an-android-device-in-shared-mode) using the [Authenticator app](https://www.microsoft.com/account/authenticator) and with a user who is in the [Cloud Device Administrator](https://docs.microsoft.com/azure/active-directory/users-groups-roles/directory-assign-admin-roles#cloud-device-administrator) role. You can configure the membership of your Organizational Roles by going to the Azure Portal and selecting:
+>
+> Azure Active Directory -> Roles and Administrators -> Cloud Device Administrator  
 
 ## Multiple Account Mode
 

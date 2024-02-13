@@ -1,5 +1,29 @@
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
 package com.azuresamples.msalandroidkotlinapp
 
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
@@ -9,35 +33,30 @@ import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.drawerlayout.widget.DrawerLayout.DrawerListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
+import com.azuresamples.msalandroidkotlinapp.SingleAccountModeFragment
 import com.google.android.material.navigation.NavigationView
-import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, OnFragmentInterationListener  {
-
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener,
+    OnFragmentInteractionListener {
     internal enum class AppFragment {
-        SingleAccount,
-        MultipleAccount,
-        B2C
+        SingleAccount, MultipleAccount, B2C
     }
 
     private var mCurrentFragment: AppFragment? = null
-
     private var mContentMain: ConstraintLayout? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         mContentMain = findViewById(R.id.content_main)
-
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
         val toggle = ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
+            this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
         )
         drawer.addDrawerListener(toggle)
         toggle.syncState()
@@ -49,35 +68,29 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        //val drawer = findViewById(R.id.drawer_layout)
-        drawer_layout.addDrawerListener(object : DrawerLayout.DrawerListener {
+        val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
+        drawer.addDrawerListener(object : DrawerListener {
             override fun onDrawerSlide(drawerView: View, slideOffset: Float) {}
-
             override fun onDrawerOpened(drawerView: View) {}
-
             override fun onDrawerClosed(drawerView: View) {
                 // Handle navigation view item clicks here.
                 val id = item.itemId
-
                 if (id == R.id.nav_single_account) {
                     setCurrentFragment(AppFragment.SingleAccount)
                 }
-
                 if (id == R.id.nav_multiple_account) {
                     setCurrentFragment(AppFragment.MultipleAccount)
                 }
-
                 if (id == R.id.nav_b2c) {
                     setCurrentFragment(AppFragment.B2C)
                 }
 
-                drawer_layout.removeDrawerListener(this)
+                drawer.removeDrawerListener(this)
             }
 
             override fun onDrawerStateChanged(newState: Int) {}
         })
-
-        drawer_layout.closeDrawer(GravityCompat.START)
+        drawer.closeDrawer(GravityCompat.START)
         return true
     }
 
@@ -85,45 +98,52 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         if (newFragment == mCurrentFragment) {
             return
         }
-
         mCurrentFragment = newFragment
-        setHeaderString(mCurrentFragment as AppFragment)
-        displayFragment(mCurrentFragment as AppFragment)
+        setHeaderString(mCurrentFragment)
+        displayFragment(mCurrentFragment)
     }
 
-    private fun setHeaderString(fragment: AppFragment) {
+    private fun setHeaderString(fragment: AppFragment?) {
         when (fragment) {
-            MainActivity.AppFragment.SingleAccount -> {
+            AppFragment.SingleAccount -> {
                 supportActionBar!!.title = "Single Account Mode"
+                supportActionBar!!.setBackgroundDrawable(ColorDrawable(Color.BLUE))
                 return
             }
-
-            MainActivity.AppFragment.MultipleAccount -> {
+            AppFragment.MultipleAccount -> {
                 supportActionBar!!.title = "Multiple Account Mode"
+                supportActionBar!!.setBackgroundDrawable(ColorDrawable(Color.BLUE))
+                return
+            }
+            AppFragment.B2C -> {
+                supportActionBar!!.title = "B2C Mode"
+                supportActionBar!!.setBackgroundDrawable(ColorDrawable(Color.BLUE))
                 return
             }
 
-            MainActivity.AppFragment.B2C -> {
-                supportActionBar!!.title = "MB2C Mode"
+            else -> {
                 return
             }
         }
     }
 
-    private fun displayFragment(fragment: AppFragment) {
+    private fun displayFragment(fragment: AppFragment?) {
         when (fragment) {
-            MainActivity.AppFragment.SingleAccount -> {
+            AppFragment.SingleAccount -> {
                 attachFragment(SingleAccountModeFragment())
                 return
             }
-
-            MainActivity.AppFragment.MultipleAccount -> {
+            AppFragment.MultipleAccount -> {
                 attachFragment(MultipleAccountModeFragment())
                 return
             }
-
-            MainActivity.AppFragment.B2C -> {
+            AppFragment.B2C -> {
                 attachFragment(B2CModeFragment())
+                return
+            }
+
+
+            else -> {
                 return
             }
         }
@@ -133,7 +153,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         supportFragmentManager
             .beginTransaction()
             .setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-            .replace(mContentMain?.id as Int, fragment)
+            .replace(mContentMain!!.id, fragment)
             .commit()
     }
 }
