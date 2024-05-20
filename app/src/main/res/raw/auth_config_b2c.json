@@ -1,5 +1,5 @@
 {
-  "client_id" : "e5737214-6372-472c-a85a-68e8fbe6cf3c",
+  "client_id" : "Enter_the_Application_Id_Here",
   "redirect_uri" : "msauth://com.azuresamples.msalandroidkotlinapp/1wIqXSqBj7w%2Bh11ZifsnqwgyKrY%3D",
   "account_mode" : "MULTIPLE",
   "broker_redirect_uri_registered": false,
