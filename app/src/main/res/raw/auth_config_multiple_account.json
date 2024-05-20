@@ -1,5 +1,5 @@
 {
-  "client_id" : "0984a7b6-bc13-4141-8b0d-8f767e136bb7",
+  "client_id" : "Enter_the_Application_Id_Here",
   "authorization_user_agent" : "WEBVIEW",
   "redirect_uri" : "msauth://com.azuresamples.msalandroidkotlinapp/1wIqXSqBj7w%2Bh11ZifsnqwgyKrY%3D",
   "account_mode" : "MULTIPLE",
