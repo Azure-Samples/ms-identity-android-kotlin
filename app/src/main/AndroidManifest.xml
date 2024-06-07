@@ -33,7 +33,7 @@
                     note that the leading "/" is required for android:path
                 -->
                 <data
-                    android:host="<enter_the_package_name>"
+                    android:host="com.azuresamples.msalandroidkotlinapp"
                     android:path="/enter_the_signature_hash"
                     android:scheme="msauth"/>
             </intent-filter>
