@@ -1,21 +1,21 @@
 {
-  "client_id" : "Enter_the_Application_Id_Here",
-  "redirect_uri" : "msauth://com.azuresamples.msalandroidkotlinapp/1wIqXSqBj7w%2Bh11ZifsnqwgyKrY%3D",
+  "client_id" : "<enter_your_clientID>",
+  "redirect_uri" : "<enter_your_redirect_uri>",
   "account_mode" : "MULTIPLE",
   "broker_redirect_uri_registered": false,
   "authorities": [
     {
       "type": "B2C",
-      "authority_url": "https://fabrikamb2c.b2clogin.com/tfp/fabrikamb2c.onmicrosoft.com/b2c_1_susi/",
+      "authority_url": "<Enter_authority_url_for_sisu>",
       "default": true
     },
     {
       "type": "B2C",
-      "authority_url": "https://fabrikamb2c.b2clogin.com/tfp/fabrikamb2c.onmicrosoft.com/b2c_1_edit_profile/"
+      "authority_url": "<Enter_authority_url_for_edit_profile"
     },
     {
       "type": "B2C",
-      "authority_url": "https://fabrikamb2c.b2clogin.com/tfp/fabrikamb2c.onmicrosoft.com/b2c_1_reset/"
+      "authority_url": "<Enter_authority_url_for_reset_password>"
     }
   ]
 }
